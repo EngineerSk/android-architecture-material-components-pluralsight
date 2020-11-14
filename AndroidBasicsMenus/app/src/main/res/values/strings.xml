@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Android Basics (Menus)</string>
+    <string name="item_1">Item 1</string>
+    <string name="item_2">item 2</string>
+    <string name="item_3">item 3</string>
+    <string name="context_menu_1">Context menu 1</string>
+    <string name="context_menu_2">Context menu 2</string>
+    <string name="context_menu_3">Context menu 3</string>
+    <string name="action_mode_1">Action Mode 1</string>
+    <string name="action_mode_2">Action Mode 2</string>
+    <string name="action_mode_3">Action Mode 3</string>
+    <string name="show_action_mode_menu">Show action mode menu</string>
+    <string name="popup_item_1">Popup item 1</string>
+    <string name="popup_item_2">Popup item 2</string>
+    <string name="popup_item_3">Popup item 3</string>
+    <string name="show_popup_menu">Show popup menu</string>
+    <string name="delete">Delete</string>
+    <string name="refresh">Refresh</string>
+    <string name="show_list_view_activity">Show list view activity</string>
+</resources>
