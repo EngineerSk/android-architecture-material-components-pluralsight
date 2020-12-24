@@ -152,4 +152,10 @@ public class ViewProfileFragment extends Fragment implements OnLikeListener, Vie
         if(view.getId() == R.id.image_back_arrow)
             mMainActivityInterface.onBackPressed();
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        checkIfConnected();
+    }
 }

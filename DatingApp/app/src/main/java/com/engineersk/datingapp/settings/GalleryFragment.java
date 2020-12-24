@@ -59,8 +59,10 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: closing the gallery fragment.");
-                getActivity().setResult(NEW_PHOTO_REQUEST);
-                getActivity().finish();
+                if(getActivity() != null) {
+                    getActivity().setResult(NEW_PHOTO_REQUEST);
+                    getActivity().finish();
+                }
             }
         });
 
@@ -71,7 +73,7 @@ public class GalleryFragment extends Fragment {
             public void onClick(View v) {
                 Log.d(TAG, "onClick: photo has been chosen.");
 
-                if(!mSelectedImage.trim().isEmpty()){
+                if(!mSelectedImage.trim().isEmpty() && getActivity() != null){
                     getActivity().setResult(
                             NEW_PHOTO_REQUEST,
                             getActivity().getIntent()
@@ -94,9 +96,8 @@ public class GalleryFragment extends Fragment {
         //check for other folders indide "/storage/emulated/0/pictures"
         String picturesDir = rootDir + File.separator + "Pictures";
         directories.add(picturesDir);
-        if (FileSearch.getDirectoryPaths(picturesDir) != null) {
-            directories = FileSearch.getDirectoryPaths(picturesDir);
-        }
+        FileSearch.getDirectoryPaths(picturesDir);
+        directories = FileSearch.getDirectoryPaths(picturesDir);
         String cameraDir = rootDir + File.separator + "DCIM" + File.separator + "Camera";
         directories.add(cameraDir);
 
@@ -108,7 +109,7 @@ public class GalleryFragment extends Fragment {
             directoryNames.add(string);
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_item, directoryNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         directorySpinner.setAdapter(adapter);
@@ -169,9 +170,11 @@ public class GalleryFragment extends Fragment {
     private void setImage(String imgURL, ImageView imageView){
         Log.d(TAG, "setImage: setting image");
 
-        Glide.with(getActivity())
-                .load(imgURL)
-                .into(imageView);
+        if(getActivity() != null) {
+            Glide.with(getActivity())
+                    .load(imgURL)
+                    .into(imageView);
+        }
     }
 
 }

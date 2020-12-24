@@ -75,8 +75,8 @@ public class MessagesFragment extends Fragment {
 
     private void getConnections() {
         Log.d(TAG, "getConnections: Loading connections...");
-        SharedPreferences PREFERENCES = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Set<String> savedNames = PREFERENCES.getStringSet(PreferenceKeys.SAVED_CONNECTIONS,
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Set<String> savedNames = preferences.getStringSet(PreferenceKeys.SAVED_CONNECTIONS,
                 new HashSet<>());
 
         mUsers.clear();
@@ -96,5 +96,12 @@ public class MessagesFragment extends Fragment {
         mMessagesRecyclerViewAdapter = new MessagesRecyclerViewAdapter(mUsers, getActivity());
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.setAdapter(mMessagesRecyclerViewAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mMessagesRecyclerViewAdapter.notifyDataSetChanged();
+        getConnections();
     }
 }

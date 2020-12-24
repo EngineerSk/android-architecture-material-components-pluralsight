@@ -1,5 +1,6 @@
 package com.engineersk.datingapp.settings;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -51,7 +52,7 @@ public class PhotoFragment extends Fragment {
         Log.d(TAG, "onCreateView: started.");
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
         //open the camera to take a picture
-        Button btnLaunchCamera = (Button) view.findViewById(R.id.btnLaunchCamera);
+        Button btnLaunchCamera = view.findViewById(R.id.btnLaunchCamera);
         btnLaunchCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,11 +67,15 @@ public class PhotoFragment extends Fragment {
 
     private void openCamera() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        mOutputUri = FileProvider.getUriForFile(getActivity(),
-                BuildConfig.APPLICATION_ID+".provider",
-               getOutputMediaFile());
-//        mOutputUri = Uri.fromFile(getOutputMediaFile());
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mOutputUri);
+
+        final File outputMediaFile = getOutputMediaFile();
+
+        if (getActivity() != null && outputMediaFile != null) {
+            mOutputUri = FileProvider.getUriForFile(getActivity(),
+                    BuildConfig.APPLICATION_ID + ".provider",
+                    outputMediaFile);
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mOutputUri);
+        }
         startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
     }
 
@@ -78,26 +83,26 @@ public class PhotoFragment extends Fragment {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "DatingApp");
 
-        if (!mediaStorageDir.exists()){
-            if (!mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
                 return null;
             }
         }
 
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.UK).format(new Date());
         return new File(mediaStorageDir.getPath() + File.separator +
-                "IMG_"+ timeStamp + ".jpg");
+                "IMG_" + timeStamp + ".jpg");
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == CAMERA_REQUEST_CODE){
-            if(data != null){
+        if (requestCode == CAMERA_REQUEST_CODE) {
+            if (data != null && getActivity() != null) {
                 Log.d(TAG, "onActivityResult: done taking a photo.");
-                Log.d(TAG, "onActivityResult: output uri: "+mOutputUri);
-                getActivity().setResult(NEW_PHOTO_REQUEST,
+                Log.d(TAG, "onActivityResult: output uri: " + mOutputUri);
+                getActivity().setResult(Activity.RESULT_OK,
                         data.putExtra(getString(R.string.intent_new_camera_photo),
                                 mOutputUri.toString()));
                 getActivity().finish();

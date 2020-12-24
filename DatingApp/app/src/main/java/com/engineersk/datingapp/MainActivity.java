@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,
         BottomNavigationViewEx.OnNavigationItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
 
-
     //constants
     private static final String TAG = "MainActivity";
     public static final int HEADER_VIEW_INDEX = 0;
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,
 
     private void initBottomNavigationView(){
         Log.d(TAG, "initBottomNavigationView: Initializing the bottom navigation view");
-//        mBottomNavigationViewEx.enableAnimation(false);
+        mBottomNavigationViewEx.enableAnimation(false);
     }
 
     private void init(){
@@ -124,8 +123,8 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,
 
     private void isFirstLogin(){
         Log.d(TAG, "isFirstLogin: Checking if this is the first login.");
-        final SharedPreferences PREFERENCES = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean isFirstLogin = PREFERENCES.getBoolean(PreferenceKeys.FIRST_TIME_LOGIN, true);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isFirstLogin = preferences.getBoolean(PreferenceKeys.FIRST_TIME_LOGIN, true);
 
         if(isFirstLogin){
             Log.d(TAG, "isFirstLogin: Launching alert Dialog");
@@ -138,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             Log.d(TAG, "onClick: closing dialog.");
-                            SharedPreferences.Editor editor = PREFERENCES.edit();
+                            SharedPreferences.Editor editor = preferences.edit();
                             editor.putBoolean(PreferenceKeys.FIRST_TIME_LOGIN, false);
                             editor.apply();
                             dialogInterface.dismiss();
@@ -220,9 +219,11 @@ public class MainActivity extends AppCompatActivity implements IMainActivity,
                         getString(R.string.tag_fragment_saved_connections)));
                 transaction.commit();
             }else{
+                mSavedConnectionsFragment.onRefresh();
                 mFragmentTags.remove(getString(R.string.tag_fragment_saved_connections));
                 mFragmentTags.add(getString(R.string.tag_fragment_saved_connections));
             }
+
             setFragmentVisibilities(getString(R.string.tag_fragment_saved_connections));
         }
         else if(itemId == R.id.bottom_nav_messages){

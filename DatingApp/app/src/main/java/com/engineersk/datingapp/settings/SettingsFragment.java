@@ -34,6 +34,8 @@ import com.engineersk.datingapp.util.Resources;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static android.app.Activity.RESULT_OK;
+
 
 public class SettingsFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
@@ -59,7 +61,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         Log.d(TAG, "onCreateView: started.");
         mBackArrow = view.findViewById(R.id.back_arrow);
@@ -89,10 +92,13 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         mName.setText(name);
 
         mSelectedGender = preferences.getString(PreferenceKeys.GENDER, getString(R.string.gender_none));
-        String[] genderArray = getActivity().getResources().getStringArray(R.array.gender_array);
-        for (int i = 0; i < genderArray.length; i++) {
-            if (genderArray[i].equals(mSelectedGender)) {
-                mGenderSpinner.setSelection(i, false);
+
+        if (getActivity() != null) {
+            String[] genderArray = getActivity().getResources().getStringArray(R.array.gender_array);
+            for (int i = 0; i < genderArray.length; i++) {
+                if (genderArray[i].equals(mSelectedGender)) {
+                    mGenderSpinner.setSelection(i, false);
+                }
             }
         }
 
@@ -113,7 +119,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         }
 
         mSelectedImageUrl = preferences.getString(PreferenceKeys.PROFILE_IMAGE, "");
-        if (!mSelectedImageUrl.equals("")) {
+        if (!mSelectedImageUrl.trim().isEmpty()) {
             Glide.with(this)
                     .load(mSelectedImageUrl)
                     .into(mProfileImage);
@@ -146,40 +152,43 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
 
         if (view.getId() == R.id.profile_image) {
             Log.d(TAG, "onClick: opening activity to choose a photo.");
-            if(mPermissionsChecked){
+            if (mPermissionsChecked) {
                 Intent intent = new Intent(getActivity(), ChoosePhotoActivity.class);
                 startActivityForResult(intent, NEW_PHOTO_REQUEST);
-            }else
+            } else
                 checkPermissions();
         }
     }
 
     private void checkPermissions() {
-        final boolean cameraGranted = ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        if (getActivity() != null) {
+            final boolean cameraGranted
+                    = ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
 
-        final boolean storageGranted = ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+            final boolean storageGranted
+                    = ContextCompat.checkSelfPermission(getActivity(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
 
-        String[] permissions = null;
+            String[] permissions = null;
 
-        if(cameraGranted){
-            if(storageGranted)
-                mPermissionsChecked = true;
-
-            else
-                permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        }else{
-            if(!storageGranted)
-                permissions = new String[]{Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE};
-            else
-                permissions = new String[]{Manifest.permission.CAMERA};
-        }
-        if(permissions != null){
-            ActivityCompat.requestPermissions(getActivity(), permissions,
-                    VERIFY_PERMISSIONS_REQUEST);
-            mPermissionsChecked = false;
+            if (cameraGranted) {
+                if (storageGranted)
+                    mPermissionsChecked = true;
+                else
+                    permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            } else {
+                if (!storageGranted)
+                    permissions = new String[]{Manifest.permission.CAMERA,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                else
+                    permissions = new String[]{Manifest.permission.CAMERA};
+            }
+            if (permissions != null) {
+                ActivityCompat.requestPermissions(getActivity(), permissions,
+                        VERIFY_PERMISSIONS_REQUEST);
+                mPermissionsChecked = false;
+            }
         }
     }
 
@@ -187,17 +196,16 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult: called.");
-        if(resultCode == NEW_PHOTO_REQUEST){
+        if (resultCode == RESULT_OK && requestCode == NEW_PHOTO_REQUEST) {
             Log.d(TAG, "onActivityResult: received an activity result from photo request");
-            if(data != null){
-                if(data.hasExtra(getString(R.string.intent_new_gallery_photo))){
+            if (data != null) {
+                if (data.hasExtra(getString(R.string.intent_new_gallery_photo))) {
                     Glide.with(this)
                             .load(data.getStringExtra(getString(R.string.intent_new_gallery_photo)))
                             .into(mProfileImage);
                     mSelectedImageUrl = data.getStringExtra(
                             getString(R.string.intent_new_gallery_photo));
-                }
-                else if(data.hasExtra(getString(R.string.intent_new_camera_photo))){
+                } else if (data.hasExtra(getString(R.string.intent_new_camera_photo))) {
                     Glide.with(this)
                             .load(data.getStringExtra(getString(R.string.intent_new_camera_photo)))
                             .into(mProfileImage);
@@ -213,7 +221,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         SharedPreferences.Editor editor = preferences.edit();
 
         String name = mName.getText().toString();
-        if (!name.equals("")) {
+        if (!name.trim().isEmpty()) {
             editor.putString(PreferenceKeys.NAME, name);
             editor.apply();
         } else {
@@ -229,7 +237,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         editor.putString(PreferenceKeys.RELATIONSHIP_STATUS, mSelectedStatus);
         editor.apply();
 
-        if (!mSelectedImageUrl.equals("")) {
+        if (!mSelectedImageUrl.trim().isEmpty()) {
             editor.putString(PreferenceKeys.PROFILE_IMAGE, mSelectedImageUrl);
             editor.apply();
         }
@@ -244,9 +252,12 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
 
     private void setBackgroundImage(View view) {
         ImageView backgroundView = view.findViewById(R.id.background);
-        Glide.with(getActivity())
-                .load(Resources.BACKGROUND_HEARTS)
-                .into(backgroundView);
+
+        if (getActivity() != null) {
+            Glide.with(getActivity())
+                    .load(Resources.BACKGROUND_HEARTS)
+                    .into(backgroundView);
+        }
 
     }
 
@@ -271,7 +282,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         int adapterViewId = adapterView.getId();
         if (adapterViewId == R.id.gender_spinner) {
             Log.d(TAG, "onItemSelected: selected a gender: "
-                    +  adapterView.getItemAtPosition(pos));
+                    + adapterView.getItemAtPosition(pos));
             mSelectedGender = adapterView.getItemAtPosition(pos).toString();
         } else if (adapterViewId == R.id.interested_in_spinner) {
             Log.d(TAG, "onItemSelected: selected an interest: "
@@ -288,7 +299,6 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     public void onNothingSelected(AdapterView<?> adapterView) {
         Log.d(TAG, "onNothingSelected: nothing is selected.");
     }
-
 
 
 }

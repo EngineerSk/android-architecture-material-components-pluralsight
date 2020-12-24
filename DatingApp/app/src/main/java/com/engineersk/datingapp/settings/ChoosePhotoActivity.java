@@ -8,6 +8,8 @@ import android.os.Bundle;
 import com.engineersk.datingapp.R;
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.Objects;
+
 public class ChoosePhotoActivity extends AppCompatActivity {
 
     private static final String TAG = "ChoosePhotoActivity";
@@ -41,10 +43,13 @@ public class ChoosePhotoActivity extends AppCompatActivity {
         myPagerAdapter.addFragment(mPhotoFragment);
 
         mViewPager.setAdapter(myPagerAdapter);
-        TabLayout tabLayout = findViewById(R.id.tabs_bottom);
+        TabLayout tabLayout =  findViewById(R.id.tabs_bottom);
+
         tabLayout.setupWithViewPager(mViewPager);
 
-        tabLayout.getTabAt(GALLERY_FRAGMENT).setText(getString(R.string.tag_fragment_gallery));
-        tabLayout.getTabAt(PHOTO_FRAGMENT).setText(getString(R.string.tag_fragment_photo));
+        Objects.requireNonNull(tabLayout.getTabAt(GALLERY_FRAGMENT))
+                .setText(getString(R.string.tag_fragment_gallery));
+        Objects.requireNonNull(tabLayout.getTabAt(PHOTO_FRAGMENT))
+                .setText(getString(R.string.tag_fragment_photo));
     }
 }
