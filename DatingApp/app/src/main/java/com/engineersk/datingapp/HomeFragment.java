@@ -1,5 +1,6 @@
 package com.engineersk.datingapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -8,12 +9,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.engineersk.datingapp.models.User;
+import com.engineersk.datingapp.util.PreferenceKeys;
 import com.engineersk.datingapp.util.Users;
 
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private StaggeredGridLayoutManager mStaggeredGridLayoutManager;
     private MainRecyclerViewAdapter mMainRecyclerViewAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private String mInterestedIn;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,15 +56,33 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private void findMatches() {
         Users users = new Users();
 
-        mMatches.clear();
+        getSavedPreferences();
 
-        List<User> usersList = Arrays.asList(users.USERS);
+        for (User user : users.USERS) {
+            if (mInterestedIn.equals(getString(R.string.interested_in_anyone))) {
+                if (!mMatches.contains(user))
+                    mMatches.add(user);
+            } else {
+                if (user.getGender().equals(mInterestedIn)
+                        || user.getGender().equals(getString(R.string.gender_none))) {
+                    if (!mMatches.contains(user))
+                        mMatches.add(user);
+                } else
+                    mMatches.remove(user);
+            }
+        }
 
-        mMatches.addAll(usersList);
-
-
-        if(mMainRecyclerViewAdapter == null)
+        if (mMainRecyclerViewAdapter == null)
             initRecyclerView();
+    }
+
+    private void getSavedPreferences() {
+
+        final SharedPreferences preferences
+                = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        mInterestedIn = preferences.getString(PreferenceKeys.INTERESTED_IN,
+                getString(R.string.interested_in_anyone));
     }
 
     private void initRecyclerView() {
@@ -71,8 +93,14 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         mRecyclerView.setAdapter(mMainRecyclerViewAdapter);
     }
 
-    public void scrollToTop(){
+    public void scrollToTop() {
         mRecyclerView.smoothScrollToPosition(TOP_POSITION);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        onRefresh();
     }
 
     @Override
@@ -82,9 +110,10 @@ public class HomeFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         onItemsLoadComplete();
     }
 
-    private void onItemsLoadComplete(){
+    private void onItemsLoadComplete() {
         Log.d(TAG, "onItemsLoadComplete: items load complete...");
         mMainRecyclerViewAdapter.notifyDataSetChanged();
-        mSwipeRefreshLayout.setRefreshing(false);
+        if(mSwipeRefreshLayout.isRefreshing())
+            mSwipeRefreshLayout.setRefreshing(false);
     }
 }
